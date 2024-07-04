@@ -14,5 +14,5 @@ In the Model Code file, we have the following py-files.
  - **timeautoencoder.py**: This file is the implementation of VAE in TimeAutoDiff. Look at Figure 2 for a schematic overview of the architecture. It also has the code for training VAE. 
  - **timediffusion.py**: This file is the implementation of the Diffusion model in TimeAutoDiff. Look at Figure 3 for a schematic overview of the architecture. It also has the code for the training & sampling process. 
  - **timediffusion_cond_label.py**: This file is the implementation of the conditional_Diffusion model in TimeAutoDiff for entity conditional generation. 
- - **TimeAutoDiff-ddpm.ipynb**: Jupyternotebook file that the user can conveniently run to see how the model works for un-conditional generation. Users can use their own dataset, or dataset in 
- - **TimeAutoDiff-Multi-Conditonal Sampling.ipynb**: Jupyternotebook file that the user can conveniently run to see how the model works for entity-conditional generation.
+ - **TimeAutoDiff-ddpm.ipynb**: Jupyternotebook file that the user can conveniently run to see how the model works for un-conditional generation. Users can use their own dataset, or dataset in Dataset/Single-Sequence folder. 
+ - **TimeAutoDiff-Multi-Conditonal Sampling.ipynb**: Jupyternotebook file that the user can conveniently run to see how the model works for entity-conditional generation. Users can use their own dataset, or dataset in Dataset/Multi-Sequence folder. 
