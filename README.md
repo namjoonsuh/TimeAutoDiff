@@ -12,5 +12,5 @@ In the Model Code file, we have the following py-files.
   
  - **process_edited.py**: This file pre-processes your tabular data into the tensor format. Users can refer to Section 2 of our paper for detailed descriptions of pre- and post-processing steps.
  - **timeautoencoder.py**: This file is the implementation of VAE in TimeAutoDiff. Look at Figure 2 for a schematic overview of the architecture. It also has the code for training VAE. 
- - **timediffusion.py**: This file is the implementation of Diffusion model in TimeAutoDiff. Look at Figure 3 for a schematic overview of the architecture. It also has the code for training & sampling process. 
- - 
+ - **timediffusion.py**: This file is the implementation of the Diffusion model in TimeAutoDiff. Look at Figure 3 for a schematic overview of the architecture. It also has the code for the training & sampling process. 
+ - **timediffusion_cond_label.py**: This file is the implementation of the conditional_Diffusion model in TimeAutoDiff for entity conditional generation. 
