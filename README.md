@@ -1,6 +1,6 @@
 # TimeAutoDiff
 This is the Github repository for code implementation of the TimeAutoDiff model (https://arxiv.org/pdf/2406.16028).
-Thanks for your interest in our model! 
+Thanks for your interest in our model! Any feedback is welcome. Also looking for collaborations with other researchers to solve scientific problems using the TimeAutoDiff model. Please contact namjsuh@ucla.edu 
 
 ## File descriptions in ``Model Code Folder''.
 In the Model Code file, we have the following py-files.
@@ -14,3 +14,5 @@ In the Model Code file, we have the following py-files.
  - **timeautoencoder.py**: This file is the implementation of VAE in TimeAutoDiff. Look at Figure 2 for a schematic overview of the architecture. It also has the code for training VAE. 
  - **timediffusion.py**: This file is the implementation of the Diffusion model in TimeAutoDiff. Look at Figure 3 for a schematic overview of the architecture. It also has the code for the training & sampling process. 
  - **timediffusion_cond_label.py**: This file is the implementation of the conditional_Diffusion model in TimeAutoDiff for entity conditional generation. 
+ - **TimeAutoDiff-ddpm.ipynb**: Jupyternotebook file that the user can conveniently run to see how the model works for un-conditional generation. 
+ - **TimeAutoDiff-ddpm.ipynb**: Jupyternotebook file that the user can conveniently run to see how the model works for un-conditional generation. 
