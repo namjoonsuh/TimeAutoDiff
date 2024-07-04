@@ -4,7 +4,7 @@ This is the Github repository for code implementation of the TimeAutoDiff model 
 Thanks for your interest in our model! Any feedback is welcome. Also looking for collaborations with other researchers to solve scientific problems using the TimeAutoDiff model. Please contact namjsuh@ucla.edu 
  
 ## File descriptions in "Model Code Folder".
-In the Model Code file, we have the following py-files.
+In the Model Code folder, we have the following py-files.
  
  - **DP.py**: This file is for splitting the dataset. We have two data splitters: one for single-sequence data (i.e., splitData), and another for multi-sequence data (i.e., partition_multi_seq).
    - For splitData(real_df, seq_len, threshold), it splits the data with windows of size ''seq_len''. 
