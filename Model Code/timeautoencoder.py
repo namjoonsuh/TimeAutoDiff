@@ -13,6 +13,7 @@ import process_edited as pce
 from torch.optim import Adam
 import DP as dp
 import math
+from rich.progress import Progress
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -22,7 +23,7 @@ def compute_sine_cosine(v, num_terms):
     v = v.to(device)
 
     # Compute the angles for all terms
-    angles = torch.tensor(2**torch.arange(num_terms).float().to(device) * torch.tensor(math.pi).to(device) * v.unsqueeze(-1)).to(device)
+    angles = 2**torch.arange(num_terms).float().to(device) * torch.tensor(math.pi).to(device) * v.unsqueeze(-1)
 
     # Compute sine and cosine values for all angles
     sine_values = torch.sin(angles)
@@ -105,41 +106,41 @@ class Embedding_data(nn.Module):
         return final_emb
 
 ################################################################################################################
-def get_torch_trans(heads = 8, layers = 1, channels = 64):
-    encoder_layer = nn.TransformerEncoderLayer(d_model = channels, nhead = heads, dim_feedforward=64, activation = "gelu")
-    return nn.TransformerEncoder(encoder_layer, num_layers = layers)
+#def get_torch_trans(heads = 8, layers = 1, channels = 64):
+#    encoder_layer = nn.TransformerEncoderLayer(d_model = channels, nhead = heads, dim_feedforward=64, activation = "gelu")
+#    return nn.TransformerEncoder(encoder_layer, num_layers = layers)
 
-class Transformer_Block(nn.Module):
-    def __init__(self, channels):
-        super().__init__()
-        self.channels = channels
+#class Transformer_Block(nn.Module):
+#    def __init__(self, channels):
+#        super().__init__()
+#        self.channels = channels
         
-        self.conv_layer1 = nn.Conv1d(1, self.channels, 1)
-        self.feature_layer = get_torch_trans(heads = 8, layers = 1, channels = self.channels)
-        self.conv_layer2 = nn.Conv1d(self.channels, 1, 1)
+#        self.conv_layer1 = nn.Conv1d(1, self.channels, 1)
+#        self.feature_layer = get_torch_trans(heads = 8, layers = 1, channels = self.channels)
+#        self.conv_layer2 = nn.Conv1d(self.channels, 1, 1)
     
-    def forward_feature(self, y, base_shape):
-        B, channels, L, K = base_shape
-        if K == 1:
-            return y.squeeze(1)
-        y = y.reshape(B, channels, L, K).permute(0, 2, 1, 3).reshape(B*L, channels, K)
-        y = self.feature_layer(y.permute(2, 0, 1)).permute(1, 2, 0)
-        y = y.reshape(B, L, channels, K).permute(0, 2, 1, 3)
-        return y
+#    def forward_feature(self, y, base_shape):
+#        B, channels, L, K = base_shape
+#        if K == 1:
+#            return y.squeeze(1)
+#        y = y.reshape(B, channels, L, K).permute(0, 2, 1, 3).reshape(B*L, channels, K)
+#        y = self.feature_layer(y.permute(2, 0, 1)).permute(1, 2, 0)
+#        y = y.reshape(B, L, channels, K).permute(0, 2, 1, 3)
+#        return y
     
-    def forward(self, x):
-        x = x.unsqueeze(1)
-        B, input_channel, K, L = x.shape
-        base_shape = x.shape
+#    def forward(self, x):
+#        x = x.unsqueeze(1)
+#        B, input_channel, K, L = x.shape
+#        base_shape = x.shape
 
-        x = x.reshape(B, input_channel, K*L)       
+#        x = x.reshape(B, input_channel, K*L)       
         
-        conv_x = self.conv_layer1(x).reshape(B, self.channels, K, L)
-        x = self.forward_feature(conv_x, conv_x.shape)
-        x = self.conv_layer2(x.reshape(B, self.channels, K*L)).squeeze(1).reshape(B, K, L)
+#        conv_x = self.conv_layer1(x).reshape(B, self.channels, K, L)
+#        x = self.forward_feature(conv_x, conv_x.shape)
+#        x = self.conv_layer2(x.reshape(B, self.channels, K*L)).squeeze(1).reshape(B, K, L)
         
-        return x
-           
+#        return x
+
 ################################################################################################################
 class DeapStack(nn.Module):
     def __init__(self, channels, batch_size, seq_len, n_bins, n_cats, n_nums, cards, input_size, hidden_size, num_layers, cat_emb_dim, time_dim, lat_dim):
@@ -148,7 +149,7 @@ class DeapStack(nn.Module):
         self.time_encode = nn.Sequential(nn.Linear(time_dim, input_size),
                                          nn.ReLU(),
                                          nn.Linear(input_size, input_size))
-        self.encoder_Transformer = Transformer_Block(channels)
+        #self.encoder_Transformer = Transformer_Block(channels)
         
         self.encoder_mu = nn.GRU(input_size, hidden_size, num_layers, batch_first=True)
         self.encoder_logvar = nn.GRU(input_size, hidden_size, num_layers, batch_first=True)
@@ -180,10 +181,10 @@ class DeapStack(nn.Module):
         eps = torch.randn_like(std)
         return mu + eps * std
     
-    def encoder(self, x, time_info = None):
+    def encoder(self, x):
         x = self.Emb(x)
-        x = self.encoder_Transformer(x)
-        x = x + self.time_encode(time_info)
+        #x = self.encoder_Transformer(x)
+        #x = x + self.time_encode(time_info)
         
         mu_z, _ = self.encoder_mu(x)
         logvar_z, _ = self.encoder_logvar(x)
@@ -210,8 +211,8 @@ class DeapStack(nn.Module):
 
         return decoded_outputs
 
-    def forward(self, x, time_info = None):
-        emb, mu_z, logvar_z = self.encoder(x, time_info)
+    def forward(self, x):
+        emb, mu_z, logvar_z = self.encoder(x)
         outputs = self.decoder(emb)
         return outputs, emb, mu_z, logvar_z
     
@@ -250,7 +251,7 @@ def auto_loss(inputs, reconstruction, n_bins, n_nums, n_cats, beta, cards):
 
     return disc_loss, num_loss
 
-def train_autoencoder(real_df, processed_data, time_info, channels, hidden_size, num_layers, lr, weight_decay, n_epochs, batch_size, threshold, min_beta, max_beta, emb_dim, time_dim, lat_dim, device):
+def train_autoencoder(real_df, processed_data, channels, hidden_size, num_layers, lr, weight_decay, n_epochs, batch_size, threshold, min_beta, max_beta, emb_dim, time_dim, lat_dim, device):
 
     parser = pce.DataFrameParser().fit(real_df, threshold)
     data = parser.transform()
@@ -261,55 +262,54 @@ def train_autoencoder(real_df, processed_data, time_info, channels, hidden_size,
     n_nums = datatype_info['n_nums']; cards = datatype_info['cards']
     
     N, seq_len, input_size = processed_data.shape
-    
     ae = DeapStack(channels, batch_size, seq_len, n_bins, n_cats, n_nums, cards, input_size, hidden_size, num_layers, emb_dim, time_dim, lat_dim).to(device)
     
     optimizer_ae = Adam(ae.parameters(), lr=lr, weight_decay=weight_decay)
 
-    tqdm_epoch = tqdm.notebook.trange(n_epochs)
     inputs = processed_data.to(device)
         
     losses = []
-    lambd = 0.7
+    recons_loss = []
+    KL_loss = []
     beta = max_beta
+    
+    lambd = 0.7
     best_train_loss = float('inf')
     all_indices = list(range(N))
-
-    for epoch in tqdm_epoch:
-        ######################### Train Auto-Encoder #########################
-        batch_indices = random.sample(all_indices, batch_size)
-
-        optimizer_ae.zero_grad()
-        outputs, _, mu_z, logvar_z = ae(inputs[batch_indices,:,:], time_info[batch_indices,:,:])
-
-        disc_loss, num_loss = auto_loss(inputs[batch_indices,:,:], outputs, n_bins, n_nums, n_cats, beta, cards)
-        temp = 1 + logvar_z - mu_z.pow(2) - logvar_z.exp()
-        loss_kld = -0.5 * torch.mean(temp.mean(-1).mean())
-        
-        if epoch % 2 == 0 and n_bins + n_cats != 0:
-            disc_loss_Auto = disc_loss + beta * loss_kld 
-            disc_loss_Auto.backward()
-            optimizer_ae.step()
-            tqdm_epoch.set_description('Average Loss: {:5f}'.format(disc_loss.item()))
-        else:
-            num_loss_Auto = num_loss + beta * loss_kld
-            num_loss_Auto.backward()
-            optimizer_ae.step()
-            tqdm_epoch.set_description('Average Loss: {:5f}'.format(num_loss.item()))
-        
-        loss_Auto = num_loss + disc_loss + beta * loss_kld
-        
-        if loss_Auto < best_train_loss:
-            best_train_loss = loss_Auto
-            patience = 0
-        else:
-            patience += 1
-            if patience == 10:
-                if beta > min_beta:
-                    beta = beta * lambd
-        
-        #losses.append(num_loss.item() + disc_loss.item())
     
-    output, latent_features, _, _ = ae(processed_data.to(device), time_info)
+    with Progress() as progress:
+        training_task = progress.add_task("[red]Training...", total=n_epochs)
+
+        for epoch in range(n_epochs):
+            ######################### Train Auto-Encoder #########################
+            batch_indices = random.sample(all_indices, batch_size)
     
-    return (ae, latent_features.detach(), output, losses)
+            optimizer_ae.zero_grad()
+            outputs, _, mu_z, logvar_z = ae(inputs[batch_indices,:,:])
+            
+            disc_loss, num_loss = auto_loss(inputs[batch_indices,:,:], outputs, n_bins, n_nums, n_cats, beta, cards)
+            temp = 1 + logvar_z - mu_z.pow(2) - logvar_z.exp()
+            loss_kld = -0.5 * torch.mean(temp.mean(-1).mean())
+            
+            loss_Auto = num_loss + disc_loss + beta * loss_kld
+            loss_Auto.backward()
+            optimizer_ae.step()
+            progress.update(training_task, advance=1, description=f"Epoch {epoch}/{n_epochs} - Loss: {loss_Auto.item():.4f}")
+            
+            if loss_Auto < best_train_loss:
+                best_train_loss = loss_Auto
+                patience = 0
+            else:
+                patience += 1
+                if patience == 10:
+                    if beta > min_beta:
+                        beta = beta * lambd
+            
+            #recons_loss.append(num_loss.item() + disc_loss.item())
+            #KL_loss.append(loss_kld.item())
+    
+    output, latent_features, _, _ = ae(processed_data)
+        
+    #return (ae, latent_features.detach(), output, losses, recons_loss, KL_loss)
+    return (ae, latent_features.detach(), output, losses, recons_loss, mu_z, logvar_z)
+

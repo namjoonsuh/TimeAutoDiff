@@ -100,14 +100,15 @@ def splitData(real_df, seq_len, threshold):
     # Normalize the data
     parser = pce.DataFrameParser().fit(real_df, threshold)
     data = parser.transform()
+    #ori_data = torch.tensor(data.astype('float32')).numpy()
     ori_data = torch.tensor(data.astype('float32')).numpy()
-    
+
     batch_size = len(ori_data) - seq_len
 
     # Preprocess the dataset
     temp_data = []
     # Cut data by sequence length
-    for i in range(0, len(ori_data) - seq_len):
+    for i in range(0, batch_size):
         _x = ori_data[i:i + seq_len]
         temp_data.append(_x)
 
@@ -117,7 +118,7 @@ def splitData(real_df, seq_len, threshold):
     #for i in range(len(temp_data)):
     #    data.append(temp_data[idx[i]])
 
-    data = torch.tensor(temp_data, dtype=torch.float)
+    data = torch.tensor(temp_data)
     
     return data
 
@@ -144,7 +145,7 @@ def splitTimeData(real_df, seq_len):
         _x = time_info[i:i + seq_len]
         temp_data.append(_x)
 
-    data = torch.tensor(temp_data, dtype=torch.float)
+    data = torch.tensor(temp_data)
     
     return data
 
