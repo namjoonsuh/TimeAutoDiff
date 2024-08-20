@@ -116,8 +116,8 @@ class DataFrameParser(object):
                 cardinality = self.new_dataframe[column].nunique(dropna=False)
                 if cardinality <= 2:
                     self.binary_columns.append(column)
-                elif cardinality > self.max_cardinality:
-                    self.numerical_columns.append(column)
+                #elif cardinality > self.max_cardinality:
+                #    self.numerical_columns.append(column)
                 else:
                     self.categorical_columns.append(column)
             
@@ -285,7 +285,7 @@ def convert_to_tensor(org_df, gen_output, threshold, data_size, seq_len):
     if n_nums != 0:
         num_tensor = torch.empty(data_size, seq_len, n_nums).to(device)
         num_tensor = gen_output['nums'].detach().to(device)
-        synth_data = torch.cat((synth_data, num_tensor),dim=2).to(device)
+        synth_data = torch.cat((synth_data, num_tensor),dim=2)
     
     return synth_data
 
