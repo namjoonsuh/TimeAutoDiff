@@ -17,3 +17,5 @@ In the Model Code folder, we have the following py-files.
  - **TimeAutoDiff-ddpm.ipynb**: Jupyternotebook file that the user can conveniently run to see how the model works for an un-conditional generation. Users can use their own dataset, or dataset in Dataset/Single-Sequence folder. 
  - **TimeAutoDiff-Multi-Conditonal Sampling.ipynb**: Jupyternotebook file that the user can conveniently run to see how the model works for entity-conditional generation. Users can use their own dataset, or dataset in Dataset/Multi-Sequence folder. 
 </p>
+
+## If you find our work interesting, please mark the star in our repository!
